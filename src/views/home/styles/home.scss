@@ -1,56 +1,11 @@
-<template>
-  <div class="home">
-    <div class="card">
-      <div class="card__title">
-        <span class="card__title--accent">DepEd</span> Attendance Generator
-      </div>
-
-      <div class="card__subtitle">
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. At accusamus iure incidunt! Rem, eveniet. Sunt sequi placeat soluta optio labore mollitia porro quidem praesentium veniam, cupiditate nihil hic saepe exercitationem?</p>
-
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. At accusamus iure incidunt! Rem, eveniet. Sunt sequi placeat soluta optio labore mollitia porro quidem praesentium veniam, cupiditate nihil hic saepe exercitationem?</p>
-      </div>
-
-      <div class="card__subtitle">
-        <h5>Click the button below to get started.</h5>
-      </div>
-
-      <div class="card__subtitle btn-container">
-        <button class="btn">
-          Upload
-        </button>
-      </div>
-
-      <div class="card__subtitle">
-        Made with 💙 by <a
-          href="https://jeash.tech"
-          target="_blank"
-        >Ernie Jeash</a>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
-export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  }
-}
-</script>
-
-<style lang="scss" scoped>
 .home {
   display: flex;
   justify-content: center;
 }
 
 .card {
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
   border-radius: 20px;
   padding-top: min(30px, 10%);
   padding-bottom: min(30px, 10%);
@@ -94,15 +49,19 @@ export default {
   }
 }
 
-.btn-container {
+.upload-container {
   display: flex;
   justify-content: center;
   margin-top: 50px;
   margin-bottom: 50px;
 
+  .upload__input-file {
+    display: none;
+  }
+
   .btn {
     background-color: $blue-500;
-    border: 0 solid #E5E7EB;
+    border: 0 solid #e5e7eb;
     box-sizing: border-box;
     color: #fff;
     display: flex;
@@ -110,7 +69,7 @@ export default {
     font-weight: 700;
     justify-content: center;
     line-height: 1.75rem;
-    padding: .75rem 1.65rem;
+    padding: 0.75rem 1.65rem;
     position: relative;
     text-align: center;
     text-decoration: none #000000 solid;
@@ -125,7 +84,7 @@ export default {
     touch-action: manipulation;
 
     @media (min-width: 768px) {
-      padding: .75rem 3rem;
+      padding: 0.75rem 3rem;
       font-size: 1.25rem;
     }
 
@@ -134,7 +93,7 @@ export default {
     }
 
     &:after {
-      content: '';
+      content: "";
       position: absolute;
       border: 1px solid #000000;
       bottom: 4px;
@@ -150,7 +109,5 @@ export default {
       bottom: 2px;
       left: 2px;
     }
-
   }
 }
-</style>

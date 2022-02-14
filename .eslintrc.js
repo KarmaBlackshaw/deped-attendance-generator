@@ -63,7 +63,7 @@ module.exports = {
       }
     ],
     'no-alert': 'off',
-    'no-await-in-loop': 'error',
+    'no-await-in-loop': 'off',
     'no-console': 'off',
     'no-debugger': 'off',
     'no-else-return': 'error',
