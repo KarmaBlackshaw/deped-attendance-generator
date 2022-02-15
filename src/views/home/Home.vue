@@ -50,6 +50,9 @@ import * as XLSX from 'xlsx'
 // composables
 import useHelpers from '@/utils/useHelpers'
 
+// libs
+import _toString from 'lodash/toString'
+
 // helpers
 const readFile = files => new Promise((resolve, reject) => {
   const reader = new FileReader()
@@ -72,6 +75,10 @@ const readFile = files => new Promise((resolve, reject) => {
 export default {
   name: 'Home',
 
+  created () {
+    this.handleFileSelect()
+  },
+
   methods: {
     async handleClickBrowseFiles () {
       const { waitUntilElementIsLoaded } = useHelpers()
@@ -82,26 +89,34 @@ export default {
     },
 
     async handleFileSelect (e) {
-      const files = e.target.files
+      // const files = e.target.files
 
-      const data = await readFile(files[0])
-      e.target.value = null
+      // const data = await readFile(files[0])
+      // e.target.value = null
 
       const workbook = XLSX.utils.book_new()
-      const worksheet = XLSX.utils.json_to_sheet(data, { skipHeader: true })
+
+      const form = [
+        [null, 'CIVIL SERVICE FORM NO. 48', null, null, null, null, null],
+        [null, 'DAILY TIME RECORD', null, null, null, null, null],
+        [null, null, null, null, null, null, null],
+        [null, 'NAME', null, null, null, null, null]
+      ]
+
+      const worksheet = XLSX.utils.json_to_sheet(form, { skipHeader: true })
 
       /* add worksheet to workbook */
       XLSX.utils.book_append_sheet(workbook, worksheet, 'SheetJS')
 
       worksheet['!cols'] = (() => {
-        const keys = Object.keys(data[0])
+        const keys = Object.keys(form[0])
         const colStyles = keys.reduce((acc, curr) => {
           return { ...acc, [curr]: { width: 0 } }
         }, {})
 
-        data.forEach(currData => {
+        form.forEach(currData => {
           keys.forEach(key => {
-            colStyles[key].width = Math.max(currData[key].length, colStyles[key].width)
+            colStyles[key].width = Math.max(_toString(currData[key]).length, colStyles[key].width)
           })
         })
 
@@ -112,7 +127,18 @@ export default {
         return Object.values(colStyles)
       })()
 
-      // XLSX.writeFile(workbook, 'test.xlsx')
+      worksheet['!merges'] = [
+        { // CIVIL SERVICE FORM NO. 48
+          s: { r: 0, c: 1 },
+          e: { r: 0, c: 5 }
+        },
+        { // DAILY TIME RECORD
+          s: { r: 1, c: 1 },
+          e: { r: 1, c: 5 }
+        }
+      ]
+
+      XLSX.writeFile(workbook, 'test.xlsx')
     }
   }
 }
