@@ -51,7 +51,7 @@ import * as XLSX from 'xlsx'
 import useHelpers from '@/utils/useHelpers'
 
 // helpers
-const readFile = files => new Promise(resolve => {
+const readFile = files => new Promise((resolve, reject) => {
   const reader = new FileReader()
 
   reader.onload = e => {
@@ -59,10 +59,12 @@ const readFile = files => new Promise(resolve => {
     const workbook = XLSX.read(data, { type: 'binary' })
     const wsname = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[wsname]
-    const json = XLSX.utils.sheet_to_json(worksheet, { header: 2 })
+    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
 
     resolve(json)
   }
+
+  reader.onerror = e => resolve(e)
 
   reader.readAsBinaryString(files)
 })
@@ -85,7 +87,32 @@ export default {
       const data = await readFile(files[0])
       e.target.value = null
 
-      console.log(JSON.stringify(data))
+      const workbook = XLSX.utils.book_new()
+      const worksheet = XLSX.utils.json_to_sheet(data, { skipHeader: true })
+
+      /* add worksheet to workbook */
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'SheetJS')
+
+      worksheet['!cols'] = (() => {
+        const keys = Object.keys(data[0])
+        const colStyles = keys.reduce((acc, curr) => {
+          return { ...acc, [curr]: { width: 0 } }
+        }, {})
+
+        data.forEach(currData => {
+          keys.forEach(key => {
+            colStyles[key].width = Math.max(currData[key].length, colStyles[key].width)
+          })
+        })
+
+        for (const key in colStyles) {
+          colStyles[key].width += 2
+        }
+
+        return Object.values(colStyles)
+      })()
+
+      // XLSX.writeFile(workbook, 'test.xlsx')
     }
   }
 }
