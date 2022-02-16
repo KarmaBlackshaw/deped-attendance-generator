@@ -96,6 +96,10 @@ export default {
 
       const workbook = XLSX.utils.book_new()
 
+      const days = Array.from({ length: 10 }, (_, i) => {
+        return [null, i + 1, null, null, null, null, null, null, null]
+      })
+
       const form = [
         [null, 'CIVIL SERVICE FORM NO. 48', null, null, null, null, null, null, null],
         [null, 'DAILY TIME RECORD', null, null, null, null, null, null, null],
@@ -104,10 +108,11 @@ export default {
         [null, '(name)', null, null, null, null, null, null, null],
         [null, 'For the month of', null, null, 'MONTH 2021', null, null, null, null],
         [null, 'Official hours for arrival (Regular day)', null, null, null, null, null, null, null],
+        [null, 'and departure (Saturdays)', null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
+        [null, 'Day', 'AM', null, 'PM', null, 'Undertime', null, null],
+        [null, null, 'Arrival', 'Departure', 'Arrival', 'Departure', 'Hours', 'Minutes', null],
+        ...days,
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
@@ -124,7 +129,9 @@ export default {
         [null, null, null, null, null, null, null, null, null]
       ]
 
-      const worksheet = XLSX.utils.json_to_sheet(form, { skipHeader: true })
+      const worksheet = XLSX.utils.json_to_sheet(form, {
+        skipHeader: true
+      })
 
       /* add worksheet to workbook */
       XLSX.utils.book_append_sheet(workbook, worksheet, 'SheetJS')
@@ -145,15 +152,25 @@ export default {
           colStyles[key].width += 2
         }
 
+        // Override
+        colStyles[1].width = 5
+
         return Object.values(colStyles)
       })()
 
       worksheet['!rows'] = (() => {
-        return [
-          { hpx: 15 },
-          { hpx: 30 },
-          { hpx: 10 }
-        ]
+        const properties = {
+          0: { hpx: 15 },
+          1: { hpx: 30 },
+          2: { hpx: 5 },
+          3: { hpx: 15 },
+          4: { hpx: 13 },
+          5: { hpx: 15 },
+          6: { hpx: 15 },
+          7: { hpx: 15 },
+          8: { hpx: 5 }
+        }
+        return Object.values(properties)
       })()
 
       worksheet['!merges'] = [
@@ -181,9 +198,45 @@ export default {
           s: { r: 5, c: 1 },
           e: { r: 5, c: 3 }
         },
-        { // FOR THE MONTH OF
+        { // FOR THE MONTH OF DATE
           s: { r: 5, c: 4 },
           e: { r: 5, c: 7 }
+        },
+        { // OFFICIAL HOURS FOR ARRIVAL
+          s: { r: 6, c: 1 },
+          e: { r: 6, c: 5 }
+        },
+        { // OFFICIAL HOURS FOR ARRIVAL
+          s: { r: 6, c: 6 },
+          e: { r: 6, c: 7 }
+        },
+        { // AND DEPARTURE
+          s: { r: 7, c: 1 },
+          e: { r: 7, c: 5 }
+        },
+        { // AND DEPARTURE
+          s: { r: 7, c: 6 },
+          e: { r: 7, c: 7 }
+        },
+        { // BLANK SPACE
+          s: { r: 8, c: 1 },
+          e: { r: 8, c: 7 }
+        },
+        { // DAY
+          s: { r: 9, c: 1 },
+          e: { r: 10, c: 1 }
+        },
+        { // AM
+          s: { r: 9, c: 2 },
+          e: { r: 9, c: 3 }
+        },
+        { // PM
+          s: { r: 9, c: 4 },
+          e: { r: 9, c: 5 }
+        },
+        { // PM
+          s: { r: 9, c: 6 },
+          e: { r: 9, c: 7 }
         }
       ]
 
@@ -222,6 +275,37 @@ export default {
                 sz: 10,
                 bold: true
               },
+              alignment: {
+                vertical: 'center',
+                horizontal: 'center'
+              }
+            }
+          })
+        })()
+
+        worksheet.B5.s = {
+          font: {
+            name: 'arial',
+            sz: 8
+          },
+          alignment: {
+            vertical: 'center',
+            horizontal: 'center'
+          }
+        }
+
+        worksheet.B10.s = {
+          alignment: {
+            vertical: 'center',
+            horizontal: 'center'
+          }
+        }
+
+        ;(() => {
+          const cols = ['C10', 'E10', 'G10', 'C11', 'D11', 'E11', 'F11', 'G11', 'H11']
+
+          cols.forEach(col => {
+            worksheet[col].s = {
               alignment: {
                 vertical: 'center',
                 horizontal: 'center'
