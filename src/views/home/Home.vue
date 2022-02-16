@@ -45,7 +45,7 @@
 
 <script>
 // libs
-import * as XLSX from 'xlsx'
+import XLSX from 'sheetjs-style'
 
 // composables
 import useHelpers from '@/utils/useHelpers'
@@ -97,10 +97,31 @@ export default {
       const workbook = XLSX.utils.book_new()
 
       const form = [
-        [null, 'CIVIL SERVICE FORM NO. 48', null, null, null, null, null],
-        [null, 'DAILY TIME RECORD', null, null, null, null, null],
-        [null, null, null, null, null, null, null],
-        [null, 'NAME', null, null, null, null, null]
+        [null, 'CIVIL SERVICE FORM NO. 48', null, null, null, null, null, null, null],
+        [null, 'DAILY TIME RECORD', null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, 'LAST NAME, GIVEN NAME M.I.', null, null, null, null, null, null, null],
+        [null, '(name)', null, null, null, null, null, null, null],
+        [null, 'For the month of', null, null, 'MONTH 2021', null, null, null, null],
+        [null, 'Official hours for arrival (Regular day)', null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null]
       ]
 
       const worksheet = XLSX.utils.json_to_sheet(form, { skipHeader: true })
@@ -127,16 +148,88 @@ export default {
         return Object.values(colStyles)
       })()
 
+      worksheet['!rows'] = (() => {
+        return [
+          { hpx: 15 },
+          { hpx: 30 },
+          { hpx: 10 }
+        ]
+      })()
+
       worksheet['!merges'] = [
         { // CIVIL SERVICE FORM NO. 48
           s: { r: 0, c: 1 },
-          e: { r: 0, c: 5 }
+          e: { r: 0, c: 7 }
         },
         { // DAILY TIME RECORD
           s: { r: 1, c: 1 },
-          e: { r: 1, c: 5 }
+          e: { r: 1, c: 7 }
+        },
+        { // BLANK SPACE
+          s: { r: 2, c: 1 },
+          e: { r: 2, c: 7 }
+        },
+        { // NAME INPUT
+          s: { r: 3, c: 1 },
+          e: { r: 3, c: 7 }
+        },
+        { // NAME LABEL
+          s: { r: 4, c: 1 },
+          e: { r: 4, c: 7 }
+        },
+        { // FOR THE MONTH OF
+          s: { r: 5, c: 1 },
+          e: { r: 5, c: 3 }
+        },
+        { // FOR THE MONTH OF
+          s: { r: 5, c: 4 },
+          e: { r: 5, c: 7 }
         }
       ]
+
+      // styles
+      ;(() => {
+        worksheet.B1.s = {
+          font: {
+            name: 'arial',
+            sz: 10,
+            bold: true
+          },
+          alignment: {
+            vertical: 'center'
+          }
+        }
+
+        worksheet.B2.s = {
+          font: {
+            name: 'arial',
+            sz: 12,
+            bold: true
+          },
+          alignment: {
+            vertical: 'center',
+            horizontal: 'center'
+          }
+        }
+
+        ;(() => {
+          const cols = ['B4', 'C4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4']
+
+          cols.forEach(col => {
+            worksheet[col].s = {
+              font: {
+                name: 'arial',
+                sz: 10,
+                bold: true
+              },
+              alignment: {
+                vertical: 'center',
+                horizontal: 'center'
+              }
+            }
+          })
+        })()
+      })()
 
       XLSX.writeFile(workbook, 'test.xlsx')
     }
