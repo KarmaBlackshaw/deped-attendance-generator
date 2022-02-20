@@ -88,92 +88,53 @@ export default {
       inputFile.click()
     },
 
-    async handleFileSelect (e) {
-      // const files = e.target.files
+    excelCols ({ form }) {
+      const keys = Object.keys(form[0])
+      const colStyles = keys.reduce((acc, curr) => {
+        return { ...acc, [curr]: { width: 0 } }
+      }, {})
 
-      // const data = await readFile(files[0])
-      // e.target.value = null
-
-      const workbook = XLSX.utils.book_new()
-
-      const days = Array.from({ length: 10 }, (_, i) => {
-        return [null, i + 1, null, null, null, null, null, null, null]
-      })
-
-      const form = [
-        [null, 'CIVIL SERVICE FORM NO. 48', null, null, null, null, null, null, null],
-        [null, 'DAILY TIME RECORD', null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, 'LAST NAME, GIVEN NAME M.I.', null, null, null, null, null, null, null],
-        [null, '(name)', null, null, null, null, null, null, null],
-        [null, 'For the month of', null, null, 'MONTH 2021', null, null, null, null],
-        [null, 'Official hours for arrival (Regular day)', null, null, null, null, null, null, null],
-        [null, 'and departure (Saturdays)', null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, 'Day', 'AM', null, 'PM', null, 'Undertime', null, null],
-        [null, null, 'Arrival', 'Departure', 'Arrival', 'Departure', 'Hours', 'Minutes', null],
-        ...days,
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null]
-      ]
-
-      const worksheet = XLSX.utils.json_to_sheet(form, {
-        skipHeader: true
-      })
-
-      /* add worksheet to workbook */
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'SheetJS')
-
-      worksheet['!cols'] = (() => {
-        const keys = Object.keys(form[0])
-        const colStyles = keys.reduce((acc, curr) => {
-          return { ...acc, [curr]: { width: 0 } }
-        }, {})
-
-        form.forEach(currData => {
-          keys.forEach(key => {
-            colStyles[key].width = Math.max(_toString(currData[key]).length, colStyles[key].width)
-          })
+      form.forEach(currData => {
+        keys.forEach(key => {
+          colStyles[key].width = Math.max(_toString(currData[key]).length, colStyles[key].width)
         })
+      })
 
-        for (const key in colStyles) {
-          colStyles[key].width += 2
-        }
+      for (const key in colStyles) {
+        colStyles[key].width += 2
+      }
 
-        // Override
-        colStyles[1].width = 5
+      // Override
+      colStyles[1].width = 4
 
-        return Object.values(colStyles)
-      })()
+      colStyles[2].width = 7
+      colStyles[3].width = 7
+      colStyles[4].width = 7
+      colStyles[5].width = 7
+      colStyles[6].width = 7
+      colStyles[7].width = 7
 
-      worksheet['!rows'] = (() => {
-        const properties = {
-          0: { hpx: 15 },
-          1: { hpx: 30 },
-          2: { hpx: 5 },
-          3: { hpx: 15 },
-          4: { hpx: 13 },
-          5: { hpx: 15 },
-          6: { hpx: 15 },
-          7: { hpx: 15 },
-          8: { hpx: 5 }
-        }
-        return Object.values(properties)
-      })()
+      return Object.values(colStyles)
+    },
 
-      worksheet['!merges'] = [
+    excelRows ({ form }) {
+      const properties = {
+        0: { hpx: 15 },
+        1: { hpx: 30 },
+        2: { hpx: 5 },
+        3: { hpx: 15 },
+        4: { hpx: 13 },
+        5: { hpx: 15 },
+        6: { hpx: 15 },
+        7: { hpx: 15 },
+        8: { hpx: 5 }
+      }
+
+      return Object.values(properties)
+    },
+
+    excelMerges ({ form }) {
+      return [
         { // CIVIL SERVICE FORM NO. 48
           s: { r: 0, c: 1 },
           e: { r: 0, c: 7 }
@@ -234,13 +195,84 @@ export default {
           s: { r: 9, c: 4 },
           e: { r: 9, c: 5 }
         },
-        { // PM
+        { // UNDETIME
           s: { r: 9, c: 6 },
           e: { r: 9, c: 7 }
+        },
+        { // i certify
+          s: { r: daysInTheMonth + 12, c: 2 },
+          e: { r: daysInTheMonth + 12, c: 7 }
         }
       ]
+    },
 
-      // styles
+    async handleFileSelect (e) {
+      // const files = e.target.files
+
+      // const data = await readFile(files[0])
+      // e.target.value = null
+
+      const workbook = XLSX.utils.book_new()
+
+      const daysInTheMonth = 20
+      const days = Array.from({ length: daysInTheMonth }, (_, i) => {
+        return ['', i + 1, '', '', '', '', '', '', '']
+      })
+
+      const form = [
+        ['', 'CIVIL SERVICE FORM NO. 48', '', '', '', '', '', '', ''],
+        ['', 'DAILY TIME RECORD', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', 'LAST NAME, GIVEN NAME M.I.', '', '', '', '', '', '', ''],
+        ['', '(name)', '', '', '', '', '', '', ''],
+        ['', 'For the month of', '', '', 'MONTH 2021', '', '', '', ''],
+        ['', 'Official hours for arrival (Regular day)', '', '', '', '', '', '', ''],
+        ['', 'and departure (Saturdays)', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', 'Day', 'AM', '', 'PM', '', 'Undertime', '', ''],
+        ['', '', 'Arrival', 'Departure', 'Arrival', 'Departure', 'Hours', 'Minutes', ''],
+        ...days,
+        ['', '', 'TOTAL', '', '', '', '', '', ''],
+        ['', '', 'I CERTIFY on my honor that the above is a true and correct', '', '', '', '', '', ''],
+        ['', 'report of the hours of work performed, record of which was made', '', '', '', '', '', '', ''],
+        ['', 'daily at the time of arrival at and departure from office', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '', '', '']
+      ]
+
+      const worksheet = XLSX.utils.json_to_sheet(form, {
+        skipHeader: true
+      })
+
+      /* add worksheet to workbook */
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'SheetJS')
+
+      /**
+       * COLUMNS
+       */
+      worksheet['!cols'] = this.excelCols({ form })
+
+      /**
+       * ROWS
+       */
+      worksheet['!rows'] = this.excelRows({ form })
+
+      /**
+       * MERGES
+       */
+      worksheet['!merges'] = this.excelMerges({ form })
+
+      /**
+       * STYLES
+       */
       ;(() => {
         worksheet.B1.s = {
           font: {
@@ -278,6 +310,12 @@ export default {
               alignment: {
                 vertical: 'center',
                 horizontal: 'center'
+              },
+              border: {
+                bottom: {
+                  style: 'thin',
+                  rgb: '#000'
+                }
               }
             }
           })
@@ -301,8 +339,11 @@ export default {
           }
         }
 
+        /**
+         * AM|PM|Undertime
+         */
         ;(() => {
-          const cols = ['C10', 'E10', 'G10', 'C11', 'D11', 'E11', 'F11', 'G11', 'H11']
+          const cols = ['C10', 'E10', 'G10']
 
           cols.forEach(col => {
             worksheet[col].s = {
@@ -313,6 +354,59 @@ export default {
             }
           })
         })()
+
+        /**
+         * Arival|Departure|Hours|minutes
+         */
+        ;(() => {
+          const cols = ['C11', 'D11', 'E11', 'F11', 'G11', 'H11']
+
+          cols.forEach(col => {
+            worksheet[col].s = {
+              alignment: {
+                vertical: 'center',
+                horizontal: 'center'
+              },
+              font: {
+                sz: 9,
+                italic: true
+              }
+            }
+          })
+        })()
+
+        /**
+         * Total
+         */
+        worksheet.C22.s = {
+          alignment: {
+            vertical: 'center',
+            horizontal: 'center'
+          },
+          font: {
+            bold: true,
+            sz: 9
+          }
+        }
+
+        /**
+         * I certify on my honor
+         */
+        // ;(() => {
+        //   const cols = [
+        //     'B23', 'C23', 'D23', 'E23', 'F23', 'G23', 'H23',
+        //     'B24', 'C24', 'D24', 'E24', 'F24', 'G24', 'H24',
+        //     'B25', 'C25', 'D25', 'E25', 'F25', 'G25', 'H25'
+        //   ]
+
+        //   cols.forEach(col => {
+        //     worksheet[col].s = {
+        //       font: {
+        //         sz: 10
+        //       }
+        //     }
+        //   })
+        // })()
       })()
 
       XLSX.writeFile(workbook, 'test.xlsx')
