@@ -52,9 +52,13 @@ import * as xlsx from 'xlsx'
 import useHelpers from '@/utils/useHelpers'
 
 // libs
+import moment from 'moment'
 import _toString from 'lodash/toString'
 import _merge from 'lodash/merge'
 import _flatten from 'lodash/flatten'
+import _groupBy from 'lodash/groupBy'
+import _get from 'lodash/get'
+import _mapKeys from 'lodash/mapKeys'
 
 // helpers
 const readFile = files => new Promise((resolve, reject) => {
@@ -65,7 +69,7 @@ const readFile = files => new Promise((resolve, reject) => {
     const workbook = xlsx.read(data, { type: 'binary' })
     const wsname = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[wsname]
-    const json = xlsx.utils.sheet_to_json(worksheet, { header: 1 })
+    const json = xlsx.utils.sheet_to_json(worksheet, { header: 2 })
 
     resolve(json)
   }
@@ -91,6 +95,163 @@ export default {
   },
 
   methods: {
+    getDtrData (data) {
+      const dictionary = {
+        Department: 'department',
+        Name: 'name',
+        'No.': 'no',
+        'Date/Time': 'datetime',
+        Status: 'status',
+        'Location ID': 'location_id',
+        'ID Number': 'id',
+        VerifyCode: 'verify_code',
+        CardNo: 'card_no'
+      }
+
+      // helpers
+      const generateDateTimelines = date => {
+        const startOfMonth = moment(date).startOf('month')
+        const endOfMonth = moment(date).endOf('month')
+        const daysGap = endOfMonth.diff(startOfMonth, 'd')
+        const timeline = {}
+
+        for (let i = 0; i < daysGap; i++) {
+          const currDate = moment(startOfMonth)
+            .add(i, 'd')
+            .format('YYYY-MM-DD')
+
+          timeline[currDate] = {}
+        }
+
+        return timeline
+      }
+
+      /**
+        * Parse, trim, and sort data
+        */
+      const snakeCaseData = data
+        .map(item => {
+          const curr = _mapKeys(item, (_, key) => dictionary[key])
+
+          const datetime = moment(curr.datetime, 'M/D/YYYY H:mm:ss A')
+
+          curr.timestamp = {
+            datetime: datetime.format('YYYY-MM-DD HH:mm:ss'),
+            date: datetime.format('YYYY-MM-DD'),
+            time: datetime.format('HH:mm:ss')
+          }
+
+          delete curr.datetime
+          delete curr.no
+          delete curr.id
+          delete curr.card_no
+          delete curr.location_id
+          delete curr.verify_code
+
+          return curr
+        })
+        .sort((x, y) => x.timestamp.datetime > y.timestamp.datetime ? 1 : -1)
+
+      /**
+        * Group data by date
+        */
+      const dateEntries = Object.entries(_groupBy(snakeCaseData, 'timestamp.date'))
+
+      const userTimelines = (() => {
+        const timelines = {}
+
+        dateEntries.forEach(([date, payload]) => {
+          const timelineByUsers = _groupBy(payload, 'name')
+
+          for (const userId in timelineByUsers) {
+            const userTimeline = timelineByUsers[userId]
+
+            const time = (() => {
+              let morningTimeIn
+              let morningTimeOut
+              let afternoonTimeIn
+              let afternoonTimeOut
+
+              userTimeline.forEach(curr => {
+                const isMorning = moment(curr.timestamp.time, 'HH:mm:ss').isBefore(moment('12:00:00', 'HH:mm:ss'))
+                const isAfternoon = !isMorning
+
+                if (isMorning) {
+                  /**
+                    * Get first morning time in
+                    */
+                  if (curr.status === 'C/In' && !morningTimeIn) {
+                    morningTimeIn = curr
+                  }
+
+                  /**
+                    * Get last morning time out
+                    */
+                  if (curr.status === 'C/Out') {
+                    morningTimeOut = curr
+                  }
+                }
+
+                if (isAfternoon) {
+                  /**
+                    * Get first morning time in
+                    */
+                  if (curr.status === 'C/In' && !afternoonTimeIn) {
+                    afternoonTimeIn = curr
+                  }
+
+                  /**
+                    * Get last morning time out
+                    */
+                  if (curr.status === 'C/Out') {
+                    afternoonTimeOut = curr
+                  }
+                }
+              })
+
+              return { morningTimeIn, morningTimeOut, afternoonTimeIn, afternoonTimeOut }
+            })()
+
+            if (!timelines[userId]) {
+              timelines[userId] = {}
+
+              const timeline = generateDateTimelines(date)
+              for (const timelineDate in timeline) {
+                timelines[userId][timelineDate] = { date: timelineDate }
+              }
+            }
+
+            if (!timelines[userId][date]) {
+              const timeline = generateDateTimelines(date)
+
+              for (const timelineDate in timeline) {
+                timelines[userId][timelineDate] = _get(timelines, [userId, timelineDate], { date: timelineDate })
+              }
+            }
+
+            const timeData = time.morningTimeOut || time.morningTimeIn || time.afternoonTimeOut || time.afternoonTimeIn
+
+            timelines[userId][date] = {
+              date: date,
+              department: timeData.department,
+              morning: {
+                time_in: _get(time.morningTimeIn, 'timestamp.datetime'),
+                time_out: _get(time.morningTimeOut, 'timestamp.datetime')
+              },
+              afternoon: {
+                time_in: _get(time.afternoonTimeIn, 'timestamp.datetime'),
+                time_out: _get(time.afternoonTimeOut, 'timestamp.datetime')
+              }
+            }
+          }
+        })
+
+        return timelines
+      })()
+
+      return Object.values(userTimelines)
+    },
+
     async handleClickBrowseFiles () {
       const inputFile = await this.waitUntilElementIsLoaded('#input-file')
 
@@ -629,12 +790,13 @@ export default {
     },
 
     async handleFileSelect (e) {
-      // const files = e.target.files
+      const files = e.target.files
 
-      // const data = await readFile(files[0])
-      // e.target.value = null
+      const data = await readFile(files[0])
+      e.target.value = null
 
-      // console.log(data)
+      const dtrData = await this.getDtrData(data)
+      console.log(JSON.stringify(dtrData))
 
       const workbook = XLSX.utils.book_new()
 
@@ -643,7 +805,7 @@ export default {
         return ['', i + 1, '', '', '', '', '', '', '']
       })
 
-      const emptySpaces = Array.from({ length: 100 }, () => {
+      const createEmptySpaces = length => Array.from({ length }, () => {
         return ['', '', '', '', '', '', '', '', '']
       })
 
@@ -670,7 +832,7 @@ export default {
         ['', '', '', 'SCHOOL PRINCIPAL NAME', '', '', '', '', ''],
         ['', '', '', 'School Principal', '', '', '', '', ''],
         ['', '', '', 'In-Charge', '', '', '', '', ''],
-        ...emptySpaces
+        ...createEmptySpaces(100)
       ]
 
       const worksheet = XLSX.utils.json_to_sheet(form, {
@@ -700,7 +862,7 @@ export default {
        */
       this.excelStyles({ worksheet, daysInTheMonth })
 
-      XLSX.writeFile(workbook, 'test.xlsx')
+      // XLSX.writeFile(workbook, 'test.xlsx')
     }
   }
 }
