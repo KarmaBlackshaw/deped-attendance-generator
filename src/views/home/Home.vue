@@ -46,6 +46,7 @@
 <script>
 // libs
 import XLSX from 'sheetjs-style'
+import * as xlsx from 'xlsx'
 
 // composables
 import useHelpers from '@/utils/useHelpers'
@@ -61,15 +62,15 @@ const readFile = files => new Promise((resolve, reject) => {
 
   reader.onload = e => {
     const data = e.target.result
-    const workbook = XLSX.read(data, { type: 'binary' })
+    const workbook = xlsx.read(data, { type: 'binary' })
     const wsname = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[wsname]
-    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
+    const json = xlsx.utils.sheet_to_json(worksheet, { header: 1 })
 
     resolve(json)
   }
 
-  reader.onerror = e => resolve(e)
+  reader.onerror = e => reject(e)
 
   reader.readAsBinaryString(files)
 })
@@ -86,7 +87,7 @@ export default {
   },
 
   created () {
-    this.handleFileSelect()
+    // this.handleFileSelect()
   },
 
   methods: {
@@ -238,40 +239,393 @@ export default {
         { // In charge
           s: { r: daysInTheMonth + 20, c: 3 },
           e: { r: daysInTheMonth + 20, c: 7 }
-        },
-        { // (See instructions on back)
-          s: { r: daysInTheMonth + 21, c: 1 },
-          e: { r: daysInTheMonth + 21, c: 3 }
-        },
-        { // instructions
-          s: { r: daysInTheMonth + 22, c: 1 },
-          e: { r: daysInTheMonth + 22, c: 7 }
-        },
-        { // civil service form no 48
-          s: { r: daysInTheMonth + 24, c: 1 },
-          e: { r: daysInTheMonth + 27, c: 7 }
-        },
-        { // in the lieu
-          s: { r: daysInTheMonth + 29, c: 1 },
-          e: { r: daysInTheMonth + 37, c: 7 }
-        },
-        { // space
-          s: { r: daysInTheMonth + 39, c: 1 },
-          e: { r: daysInTheMonth + 42, c: 7 }
-        },
-        { // space
-          s: { r: daysInTheMonth + 44, c: 1 },
-          e: { r: daysInTheMonth + 46, c: 7 }
-        },
-        { // space
-          s: { r: daysInTheMonth + 48, c: 1 },
-          e: { r: daysInTheMonth + 58, c: 7 }
-        },
-        { // space
-          s: { r: daysInTheMonth + 60, c: 1 },
-          e: { r: daysInTheMonth + 64, c: 7 }
         }
       ]
+    },
+
+    excelStyles ({ worksheet, daysInTheMonth }) {
+      const gap = num => daysInTheMonth + num
+      const merge = (col, styles) => _merge(worksheet[col]?.s ?? {}, styles, { font: { name: 'Arial' } })
+
+      /**
+         * CIVIL SERVICE FORM No. 48
+         */
+      worksheet.B1.s = merge('B1', {
+        font: {
+          name: 'arial',
+          sz: 9,
+          bold: true
+        },
+        alignment: {
+          vertical: 'center'
+        }
+      })
+
+      /**
+         * DAILY TIME RECORD
+         */
+      worksheet.B2.s = merge('B2', {
+        font: {
+          name: 'arial',
+          sz: 12,
+          bold: true
+        },
+        alignment: {
+          vertical: 'center',
+          horizontal: 'center'
+        }
+      })
+
+      /**
+         * Fullname
+         */
+      ;(() => {
+        const cols = ['B4', 'C4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4']
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            font: {
+              name: 'arial',
+              sz: 10,
+              bold: true
+            },
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            border: {
+              bottom: {
+                style: 'thin'
+              }
+            }
+          })
+        })
+      })()
+
+      /**
+         * (name)
+         */
+      worksheet.B5.s = merge('B5', {
+        font: {
+          sz: 6
+        },
+        alignment: {
+          vertical: 'center',
+          horizontal: 'center'
+        }
+      })
+
+      /**
+         * For the month of [static values]
+         */
+      ;(() => {
+        const cols = [
+          'B6', 'C6', 'D6', // For the month of
+          'B7', 'C7', 'D7', 'E7', 'F7', // Official hours
+          'B8', 'C8', 'D8', 'E8', 'F8' // Official hours
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'left'
+            },
+            font: {
+              sz: 9
+            }
+          })
+        })
+      })()
+
+      /**
+         * For the month of [dynamic values]
+         */
+      ;(() => {
+        const cols = [
+          'E6', 'F6', 'G6', 'H6', // For the month of
+          'G7', 'H7', // Official hours
+          'G8', 'H8' // Official hours
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: 8,
+              bold: true
+            },
+            border: {
+              bottom: {
+                style: 'thin'
+              }
+            }
+          })
+        })
+      })()
+
+      // Date table
+      ;(() => {
+        const dayCols = Array
+          .from({ length: daysInTheMonth + 1 }, (_, i) => {
+            return [`B${i + 11}`, `C${i + 11}`, `D${i + 11}`, `E${i + 11}`, `F${i + 11}`, `G${i + 11}`, `H${i + 11}`]
+          })
+
+        const cols = [
+          'B10', 'C10', 'D10', 'E10', 'F10', 'G10', 'H10',
+          'B11', 'C11', 'D11', 'E11', 'F11', 'G11', 'H11',
+          ..._flatten(dayCols)
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            border: {
+              bottom: {
+                style: 'thin'
+              },
+              top: {
+                style: 'thin'
+              },
+              left: {
+                style: 'thin'
+              },
+              right: {
+                style: 'thin'
+              }
+            }
+          })
+        })
+      })()
+
+      worksheet.B10.s = merge('B10', {
+        alignment: {
+          vertical: 'center',
+          horizontal: 'center'
+        },
+        font: {
+          sz: 7
+        }
+      })
+
+      /**
+         * AM|PM|Undertime
+         */
+      ;(() => {
+        const cols = ['C10', 'E10', 'G10']
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: '8'
+            }
+          })
+        })
+      })()
+
+      /**
+         * Arival|Departure|Hours|minutes
+         */
+      ;(() => {
+        const cols = ['C11', 'D11', 'E11', 'F11', 'G11', 'H11']
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: 7
+            }
+          })
+        })
+      })()
+
+      ;(() => {
+        const cols = Array.from({ length: daysInTheMonth }, (_, i) => {
+          return `B${12 + i}`
+        })
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: 10,
+              italic: true
+            }
+          })
+        })
+      })()
+
+      /**
+         * Total
+         */
+      ;(() => {
+        const cols = ['B', 'C', 'D', 'E', 'F', 'G', 'H'].map(letter => {
+          return `${letter}${gap(12)}`
+        })
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              bold: true,
+              sz: 9
+            },
+            border: {
+              bottom: {
+                style: 'thin'
+              }
+            }
+          })
+        })
+      })()
+
+      /**
+         * I certify on my honor
+         */
+      ;(() => {
+        const cols = [
+            `B${gap(13)}`, `C${gap(13)}`, `D${gap(13)}`, `E${gap(13)}`, `F${gap(13)}`, `G${gap(13)}`, `H${gap(13)}`,
+            `B${gap(14)}`, `C${gap(14)}`, `D${gap(14)}`, `E${gap(14)}`, `F${gap(14)}`, `G${gap(14)}`, `H${gap(14)}`,
+            `B${gap(15)}`, `C${gap(15)}`, `D${gap(15)}`, `E${gap(15)}`, `F${gap(15)}`, `G${gap(15)}`, `H${gap(15)}`
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            font: {
+              sz: 8
+            }
+          })
+        })
+      })()
+
+      /**
+         * Verified as to the prescribed office hours
+         */
+      ;(() => {
+        const cols = [
+            `B${gap(17)}`, `C${gap(17)}`, `D${gap(17)}`, `E${gap(17)}`, `F${gap(17)}`, `G${gap(17)}`, `H${gap(17)}`
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: 8
+            },
+            border: {
+              top: {
+                style: 'thin'
+              }
+            }
+          })
+        })
+      })()
+
+      /**
+         * School Principal Name
+         */
+      ;(() => {
+        const cols = [
+            `D${gap(19)}`, `E${gap(19)}`, `F${gap(19)}`, `G${gap(19)}`, `H${gap(19)}`
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              bold: true,
+              sz: 9
+            }
+          })
+        })
+      })()
+
+      /**
+         * School Principal
+         */
+      ;(() => {
+        const cols = [
+            `D${gap(20)}`, `E${gap(20)}`, `F${gap(20)}`, `G${gap(20)}`, `H${gap(20)}`
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: 8
+            }
+          })
+        })
+      })()
+
+      /**
+         * In-Charge
+         */
+      ;(() => {
+        const cols = [
+            `D${gap(21)}`, `E${gap(21)}`, `F${gap(21)}`, `G${gap(21)}`, `H${gap(21)}`
+        ]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center',
+              horizontal: 'center'
+            },
+            font: {
+              sz: 8
+            },
+            border: {
+              top: {
+                style: 'thin'
+              }
+            }
+          })
+        })
+      })()
+
+      /**
+         * in-charge
+         */
+      ;(() => {
+        const cols = [`B${gap(22)}`, `C${gap(22)}`, `D${gap(22)}`]
+
+        cols.forEach(col => {
+          worksheet[col].s = merge(col, {
+            alignment: {
+              vertical: 'center'
+            },
+            font: {
+              italic: true,
+              sz: 8
+            }
+          })
+        })
+      })()
     },
 
     async handleFileSelect (e) {
@@ -279,6 +633,8 @@ export default {
 
       // const data = await readFile(files[0])
       // e.target.value = null
+
+      // console.log(data)
 
       const workbook = XLSX.utils.book_new()
 
@@ -290,8 +646,6 @@ export default {
       const emptySpaces = Array.from({ length: 100 }, () => {
         return ['', '', '', '', '', '', '', '', '']
       })
-
-      const gap = num => daysInTheMonth + num
 
       const form = [
         ['', 'CIVIL SERVICE FORM NO. 48', '', '', '', '', '', '', ''],
@@ -316,46 +670,6 @@ export default {
         ['', '', '', 'SCHOOL PRINCIPAL NAME', '', '', '', '', ''],
         ['', '', '', 'School Principal', '', '', '', '', ''],
         ['', '', '', 'In-Charge', '', '', '', '', ''],
-        ['', '(See instructions on back)', '', '', '', '', '', '', ''],
-        ['', 'INSTRUCTIONS', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '              Civil Service Form No. 48, after completion should be filed in the records of the bureau or office which submits the monthly report on Civil Service Form No. 3 to the Bureau of Civil', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '              In the Lieu of the above, court interpreters and stenographers who accompany the judges of the court in First Instance will fill out the daily time reports on this form in triplicate, after which they should be approved by the judge with whom service has been rendered, or by an officer of the Department of Justice authorized to do so.The original should be forwarded promptly after the end of the month to the Bureau of Civil Service, thru the department of Justice; the duplicate to be kept in the Department of Justice; and the triplicate, in the office of the Clerk of Court where service were rendered.', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '              In the space provided for the purpose on the other side will be indicated the office hours the employee is required to observed, as for example. "Regular days, 3:00-12:00 and 1-4: Saturdays, 5:00-1:00."', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '              Attention is invited to paragraph 3, Civil Service Rule XV, Executive Order No. 5 series of 1909, which reads as follows:', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '              Each chief of bureau of office shall require a daily record of attendance of all officers and employees under him extitled to leave of a absence or vacation (including teachers) to be kept on the proper form and also a systematic office record showing for each day all absences from duty from any cause whatever. At the beginning of each month he shall report to the Commissioner on the proper form of all absences from any cause whatever, including the exact amount of undertime of each person for each day. Officers or employees must be included in the monthly report of changes and absences. Falsificationof time records will render the offending officer or employee liable to summary removal from the service anbd criminal prosecution."', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '              (NOTE: - A record made from memory at sometime subsequent to the occurrence of an event is not reliable. Non-observance of office hours deprives the employee of the leave of privileges although he may have rendered overtime services. Where service rendered outside of the Office for the whole morning or afternoon, notation to that effect should be made.', '', '', '', '', '', '', ''],
         ...emptySpaces
       ]
 
@@ -384,487 +698,7 @@ export default {
       /**
        * STYLES
        */
-      const merge = (col, styles) => _merge(worksheet[col]?.s ?? {}, styles, { font: { name: 'Arial' } })
-
-      ;(() => {
-        /**
-         * CIVIL SERVICE FORM No. 48
-         */
-        worksheet.B1.s = merge('B1', {
-          font: {
-            name: 'arial',
-            sz: 9,
-            bold: true
-          },
-          alignment: {
-            vertical: 'center'
-          }
-        })
-
-        /**
-         * DAILY TIME RECORD
-         */
-        worksheet.B2.s = merge('B2', {
-          font: {
-            name: 'arial',
-            sz: 12,
-            bold: true
-          },
-          alignment: {
-            vertical: 'center',
-            horizontal: 'center'
-          }
-        })
-
-        /**
-         * Fullname
-         */
-        ;(() => {
-          const cols = ['B4', 'C4', 'C4', 'D4', 'E4', 'F4', 'G4', 'H4']
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              font: {
-                name: 'arial',
-                sz: 10,
-                bold: true
-              },
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              border: {
-                bottom: {
-                  style: 'thin'
-                }
-              }
-            })
-          })
-        })()
-
-        /**
-         * (name)
-         */
-        worksheet.B5.s = merge('B5', {
-          font: {
-            sz: 6
-          },
-          alignment: {
-            vertical: 'center',
-            horizontal: 'center'
-          }
-        })
-
-        /**
-         * For the month of [static values]
-         */
-        ;(() => {
-          const cols = [
-            'B6', 'C6', 'D6', // For the month of
-            'B7', 'C7', 'D7', 'E7', 'F7', // Official hours
-            'B8', 'C8', 'D8', 'E8', 'F8' // Official hours
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'left'
-              },
-              font: {
-                sz: 9
-              }
-            })
-          })
-        })()
-
-        /**
-         * For the month of [dynamic values]
-         */
-        ;(() => {
-          const cols = [
-            'E6', 'F6', 'G6', 'H6', // For the month of
-            'G7', 'H7', // Official hours
-            'G8', 'H8' // Official hours
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: 8,
-                bold: true
-              },
-              border: {
-                bottom: {
-                  style: 'thin'
-                }
-              }
-            })
-          })
-        })()
-
-        // Date table
-        ;(() => {
-          const dayCols = Array
-            .from({ length: daysInTheMonth + 1 }, (_, i) => {
-              return [`B${i + 11}`, `C${i + 11}`, `D${i + 11}`, `E${i + 11}`, `F${i + 11}`, `G${i + 11}`, `H${i + 11}`]
-            })
-
-          const cols = [
-            'B10', 'C10', 'D10', 'E10', 'F10', 'G10', 'H10',
-            'B11', 'C11', 'D11', 'E11', 'F11', 'G11', 'H11',
-            ..._flatten(dayCols)
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              border: {
-                bottom: {
-                  style: 'thin'
-                },
-                top: {
-                  style: 'thin'
-                },
-                left: {
-                  style: 'thin'
-                },
-                right: {
-                  style: 'thin'
-                }
-              }
-            })
-          })
-        })()
-
-        worksheet.B10.s = merge('B10', {
-          alignment: {
-            vertical: 'center',
-            horizontal: 'center'
-          },
-          font: {
-            sz: 7
-          }
-        })
-
-        /**
-         * AM|PM|Undertime
-         */
-        ;(() => {
-          const cols = ['C10', 'E10', 'G10']
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: '8'
-              }
-            })
-          })
-        })()
-
-        /**
-         * Arival|Departure|Hours|minutes
-         */
-        ;(() => {
-          const cols = ['C11', 'D11', 'E11', 'F11', 'G11', 'H11']
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: 7
-              }
-            })
-          })
-        })()
-
-        ;(() => {
-          const cols = Array.from({ length: daysInTheMonth }, (_, i) => {
-            return `B${12 + i}`
-          })
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: 10,
-                italic: true
-              }
-            })
-          })
-        })()
-
-        /**
-         * Total
-         */
-        ;(() => {
-          const cols = ['B', 'C', 'D', 'E', 'F', 'G', 'H'].map(letter => {
-            return `${letter}${gap(12)}`
-          })
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                bold: true,
-                sz: 9
-              },
-              border: {
-                bottom: {
-                  style: 'thin'
-                }
-              }
-            })
-          })
-        })()
-
-        /**
-         * I certify on my honor
-         */
-        ;(() => {
-          const cols = [
-            `B${gap(13)}`, `C${gap(13)}`, `D${gap(13)}`, `E${gap(13)}`, `F${gap(13)}`, `G${gap(13)}`, `H${gap(13)}`,
-            `B${gap(14)}`, `C${gap(14)}`, `D${gap(14)}`, `E${gap(14)}`, `F${gap(14)}`, `G${gap(14)}`, `H${gap(14)}`,
-            `B${gap(15)}`, `C${gap(15)}`, `D${gap(15)}`, `E${gap(15)}`, `F${gap(15)}`, `G${gap(15)}`, `H${gap(15)}`
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              font: {
-                sz: 8
-              }
-            })
-          })
-        })()
-
-        /**
-         * Verified as to the prescribed office hours
-         */
-        ;(() => {
-          const cols = [
-            `B${gap(17)}`, `C${gap(17)}`, `D${gap(17)}`, `E${gap(17)}`, `F${gap(17)}`, `G${gap(17)}`, `H${gap(17)}`
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: 8
-              },
-              border: {
-                top: {
-                  style: 'thin'
-                }
-              }
-            })
-          })
-        })()
-
-        /**
-         * School Principal Name
-         */
-        ;(() => {
-          const cols = [
-            `D${gap(19)}`, `E${gap(19)}`, `F${gap(19)}`, `G${gap(19)}`, `H${gap(19)}`
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                bold: true,
-                sz: 9
-              }
-            })
-          })
-        })()
-
-        /**
-         * School Principal
-         */
-        ;(() => {
-          const cols = [
-            `D${gap(20)}`, `E${gap(20)}`, `F${gap(20)}`, `G${gap(20)}`, `H${gap(20)}`
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: 8
-              }
-            })
-          })
-        })()
-
-        /**
-         * In-Charge
-         */
-        ;(() => {
-          const cols = [
-            `D${gap(21)}`, `E${gap(21)}`, `F${gap(21)}`, `G${gap(21)}`, `H${gap(21)}`
-          ]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                sz: 8
-              },
-              border: {
-                top: {
-                  style: 'thin'
-                }
-              }
-            })
-          })
-        })()
-
-        /**
-         * in-charge
-         */
-        ;(() => {
-          const cols = [`B${gap(22)}`, `C${gap(22)}`, `D${gap(22)}`]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center'
-              },
-              font: {
-                italic: true,
-                sz: 8
-              }
-            })
-          })
-        })()
-
-        /**
-         * (See instructions on back)
-
-         */
-        ;(() => {
-          const cols = [`B${gap(22)}`, `C${gap(22)}`, `D${gap(22)}`, `E${gap(22)}`, `F${gap(22)}`, `G${gap(22)}`, `H${gap(22)}`]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              border: {
-                bottom: {
-                  style: 'medium'
-                }
-              }
-            })
-          })
-        })()
-
-        /**
-         * INSTRUCTIONS
-         */
-        ;(() => {
-          const cols = [`B${gap(23)}`, `C${gap(23)}`, `D${gap(23)}`, `E${gap(23)}`, `F${gap(23)}`, `G${gap(23)}`, `H${gap(23)}`]
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'center'
-              },
-              font: {
-                bold: true,
-                sz: 12
-              }
-            })
-          })
-        })()
-
-        /**
-         * civil service form no. 48
-         */
-        ;(() => {
-          const range = [25, 70]
-
-          let i = range[0]
-          const cols = []
-          while (i <= range[1]) {
-            const currCol = [
-              `B${gap(i)}`, `C${gap(i)}`, `D${gap(i)}`, `E${gap(i)}`, `F${gap(i)}`, `G${gap(i)}`, `H${gap(i)}`
-            ]
-            cols.push(...currCol)
-            i++
-          }
-
-          cols.forEach(col => {
-            worksheet[col].s = merge(col, {
-              alignment: {
-                vertical: 'center',
-                horizontal: 'left',
-                wrapText: true
-              },
-              font: {
-                sz: 10
-              }
-            })
-          })
-        })()
-
-        // /**
-        //  * civil service form no. 48
-        //  */
-        // ;(() => {
-        //   const range = [30, 49]
-
-        //   let i = range[0]
-        //   const cols = []
-        //   while (i <= range[1]) {
-        //     const currCol = [
-        //       `B${gap(i)}`, `C${gap(i)}`, `D${gap(i)}`, `E${gap(i)}`, `F${gap(i)}`, `G${gap(i)}`, `H${gap(i)}`
-        //     ]
-        //     cols.push(...currCol)
-        //     i++
-        //   }
-
-        //   cols.forEach(col => {
-        //     worksheet[col].s = merge(col, {
-        //       alignment: {
-        //         vertical: 'center',
-        //         horizontal: 'left',
-        //         wrapText: true
-        //       },
-        //       font: {
-        //         sz: 10
-        //       }
-        //     })
-        //   })
-        // })()
-      })()
+      this.excelStyles({ worksheet, daysInTheMonth })
 
       XLSX.writeFile(workbook, 'test.xlsx')
     }
