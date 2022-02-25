@@ -157,7 +157,7 @@ export default {
         */
       const dateEntries = Object.entries(_groupBy(snakeCaseData, 'timestamp.date'))
 
-      const userTimelines = (() => {
+      const attendanceByUserId = (() => {
         const timelines = {}
 
         dateEntries.forEach(([date, payload]) => {
@@ -235,12 +235,12 @@ export default {
               date: date,
               department: timeData.department,
               morning: {
-                time_in: _get(time.morningTimeIn, 'timestamp.datetime'),
-                time_out: _get(time.morningTimeOut, 'timestamp.datetime')
+                time_in: _get(time.morningTimeIn, 'timestamp.time'),
+                time_out: _get(time.morningTimeOut, 'timestamp.time')
               },
               afternoon: {
-                time_in: _get(time.afternoonTimeIn, 'timestamp.datetime'),
-                time_out: _get(time.afternoonTimeOut, 'timestamp.datetime')
+                time_in: _get(time.afternoonTimeIn, 'timestamp.time'),
+                time_out: _get(time.afternoonTimeOut, 'timestamp.time')
               }
             }
           }
@@ -249,7 +249,49 @@ export default {
         return timelines
       })()
 
-      return Object.values(userTimelines)
+      const attendanceList = []
+      for (const userId in attendanceByUserId) {
+        const currAttendance = attendanceByUserId[userId]
+
+        const dates = Object.keys(currAttendance)
+
+        const sortedDates = dates.sort((x, y) => (new Date(x) > new Date(y) ? 1 : -1))
+
+        const attendance = {}
+        sortedDates.forEach(curr => {
+          const monthOf = moment(curr).format('MMMM YYYY')
+
+          if (!attendance[monthOf]) {
+            attendance[monthOf] = []
+          }
+
+          const item = currAttendance[curr]
+          const dayNo = moment(curr).format('D')
+          const amArrival = _get(item, 'morning.time_in', '')
+          const amDeparture = _get(item, 'morning.time_out', '')
+          const pmArrival = _get(item, 'afternoon.time_in', '')
+          const pmDeparture = _get(item, 'afternoon.time_out', '')
+
+          attendance[monthOf].push([
+            '',
+            dayNo,
+            amArrival ? moment(amArrival, 'HH:mm:ss').format('hh:mm:ss') : '',
+            amDeparture ? moment(amDeparture, 'HH:mm:ss').format('hh:mm:ss') : '',
+            pmArrival ? moment(pmArrival, 'HH:mm:ss').format('hh:mm:ss') : '',
+            pmDeparture ? moment(pmDeparture, 'HH:mm:ss').format('hh:mm:ss') : '',
+            '',
+            '',
+            ''
+          ])
+        })
+
+        attendanceList.push({
+          user_id: userId,
+          attendance
+        })
+      }
+
+      return attendanceList
     },
 
     async handleClickBrowseFiles () {
@@ -543,6 +585,9 @@ export default {
 
         cols.forEach(col => {
           worksheet[col].s = merge(col, {
+            font: {
+              sz: 9
+            },
             border: {
               bottom: {
                 style: 'thin'
@@ -790,79 +835,85 @@ export default {
     },
 
     async handleFileSelect (e) {
+      /**
+        Helpers
+        */
+      const createEmptySpaces = length => Array.from({ length }, () => {
+        return ['', '', '', '', '', '', '', '', '']
+      })
+
       const files = e.target.files
 
       const data = await readFile(files[0])
       e.target.value = null
 
       const dtrData = await this.getDtrData(data)
-      console.log(JSON.stringify(dtrData))
 
-      const workbook = XLSX.utils.book_new()
+      dtrData.forEach(userData => {
+        const workbook = XLSX.utils.book_new()
 
-      const daysInTheMonth = 10
-      const days = Array.from({ length: daysInTheMonth }, (_, i) => {
-        return ['', i + 1, '', '', '', '', '', '', '']
+        for (const monthOf in userData.attendance) {
+          const days = userData.attendance[monthOf]
+          const daysInTheMonth = days.length
+
+          const form = [
+            ['', 'CIVIL SERVICE FORM NO. 48', '', '', '', '', '', '', ''],
+            ['', 'DAILY TIME RECORD', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', ''],
+            ['', userData.user_id, '', '', '', '', '', '', ''],
+            ['', '(Name)', '', '', '', '', '', '', ''],
+            ['', 'For the month of', '', '', monthOf, '', '', '', ''],
+            ['', 'Official hours for arrival (Regular day)', '', '', '', '', '', '', ''],
+            ['', 'and departure (Saturdays)', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', ''],
+            ['', 'Day', 'AM', '', 'PM', '', 'Undertime', '', ''],
+            ['', '', 'Arrival', 'Departure', 'Arrival', 'Departure', 'Hours', 'Minutes', ''],
+            ...days,
+            ['', '', 'TOTAL', '', '', '', '', '', ''],
+            ['', '', 'I CERTIFY on my honor that the above is a true and correct', '', '', '', '', '', ''],
+            ['', 'report of the hours of work performed, record of which was made', '', '', '', '', '', '', ''],
+            ['', 'daily at the time of arrival at and departure from office', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', ''],
+            ['', 'Verified as to the prescribed office hours', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', ''],
+            ['', '', '', 'SCHOOL PRINCIPAL NAME', '', '', '', '', ''],
+            ['', '', '', 'School Principal', '', '', '', '', ''],
+            ['', '', '', 'In-Charge', '', '', '', '', ''],
+            ...createEmptySpaces(100)
+          ]
+
+          const worksheet = XLSX.utils.json_to_sheet(form, {
+            skipHeader: true
+          })
+
+          const filename = `${userData.user_id}|${monthOf}`
+
+          /* add worksheet to workbook */
+          XLSX.utils.book_append_sheet(workbook, worksheet, filename)
+
+          /**
+          * COLUMNS
+          */
+          worksheet['!cols'] = this.excelCols({ form })
+
+          /**
+          * ROWS
+          */
+          worksheet['!rows'] = this.excelRows({ form })
+
+          /**
+            * MERGES
+            */
+          worksheet['!merges'] = this.excelMerges({ form, daysInTheMonth })
+
+          /**
+            * STYLES
+            */
+          this.excelStyles({ worksheet, daysInTheMonth })
+
+          XLSX.writeFile(workbook, `${filename}.xlsx`)
+        }
       })
-
-      const createEmptySpaces = length => Array.from({ length }, () => {
-        return ['', '', '', '', '', '', '', '', '']
-      })
-
-      const form = [
-        ['', 'CIVIL SERVICE FORM NO. 48', '', '', '', '', '', '', ''],
-        ['', 'DAILY TIME RECORD', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', 'LAST NAME, GIVEN NAME M.I.', '', '', '', '', '', '', ''],
-        ['', '(Name)', '', '', '', '', '', '', ''],
-        ['', 'For the month of', '', '', 'MONTH 2021', '', '', '', ''],
-        ['', 'Official hours for arrival (Regular day)', '', '', '', '', '', '', ''],
-        ['', 'and departure (Saturdays)', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', 'Day', 'AM', '', 'PM', '', 'Undertime', '', ''],
-        ['', '', 'Arrival', 'Departure', 'Arrival', 'Departure', 'Hours', 'Minutes', ''],
-        ...days,
-        ['', '', 'TOTAL', '', '', '', '', '', ''],
-        ['', '', 'I CERTIFY on my honor that the above is a true and correct', '', '', '', '', '', ''],
-        ['', 'report of the hours of work performed, record of which was made', '', '', '', '', '', '', ''],
-        ['', 'daily at the time of arrival at and departure from office', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', 'Verified as to the prescribed office hours', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', '', ''],
-        ['', '', '', 'SCHOOL PRINCIPAL NAME', '', '', '', '', ''],
-        ['', '', '', 'School Principal', '', '', '', '', ''],
-        ['', '', '', 'In-Charge', '', '', '', '', ''],
-        ...createEmptySpaces(100)
-      ]
-
-      const worksheet = XLSX.utils.json_to_sheet(form, {
-        skipHeader: true
-      })
-
-      /* add worksheet to workbook */
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'SheetJS')
-
-      /**
-       * COLUMNS
-       */
-      worksheet['!cols'] = this.excelCols({ form })
-
-      /**
-       * ROWS
-       */
-      worksheet['!rows'] = this.excelRows({ form })
-
-      /**
-       * MERGES
-       */
-      worksheet['!merges'] = this.excelMerges({ form, daysInTheMonth })
-
-      /**
-       * STYLES
-       */
-      this.excelStyles({ worksheet, daysInTheMonth })
-
-      // XLSX.writeFile(workbook, 'test.xlsx')
     }
   }
 }
