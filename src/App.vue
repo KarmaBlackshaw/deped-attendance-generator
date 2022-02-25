@@ -6,10 +6,6 @@
   </div>
 </template>
 
-<script>
-export default {
-}
-</script>
 <style lang="scss">
 .app {
   min-height: 100vh;
@@ -19,6 +15,5 @@ export default {
   @include smAndBelow {
     padding: 10px;
   }
-
 }
 </style>
