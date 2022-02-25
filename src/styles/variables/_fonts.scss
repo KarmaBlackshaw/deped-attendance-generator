@@ -31,17 +31,19 @@
   }
 }
 
-@include font(Montserrat, "montserrat/montserrat-400", 400);
-@include font(Montserrat, "montserrat/montserrat-800", 800);
+// @include font(Montserrat, "montserrat/montserrat-400", 400);
+// @include font(Montserrat, "montserrat/montserrat-800", 800);
 
-@include font(Poppins, "poppins/Poppins-400", 400);
-@include font(Poppins, "poppins/Poppins-700", 700);
-@include font(Poppins, "poppins/Poppins-800", 800);
+// @include font(Poppins, "poppins/Poppins-400", 400);
+// @include font(Poppins, "poppins/Poppins-700", 700);
+// @include font(Poppins, "poppins/Poppins-800", 800);
 
-@include font(Roboto, "roboto/Roboto-400", 400);
-@include font(Roboto, "roboto/Roboto-900", 900);
+// @include font(Roboto, "roboto/Roboto-400", 400);
+// @include font(Roboto, "roboto/Roboto-900", 900);
 
-@include font(Roboto, "quicksand/quicksand-500", 500);
-@include font(Roboto, "quicksand/quicksand-600", 600);
-@include font(Roboto, "quicksand/quicksand-700", 700);
-@include font(Roboto, "quicksand/quicksand-regular", 400);
+// @include font(Roboto, "quicksand/quicksand-500", 500);
+// @include font(Roboto, "quicksand/quicksand-600", 600);
+// @include font(Roboto, "quicksand/quicksand-700", 700);
+// @include font(Roboto, "quicksand/quicksand-regular", 400);
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;800&family=Poppins:wght@400;700;800&family=Quicksand:wght@400;500;600;700&family=Roboto:wght@400;900&display=swap");
