@@ -2,13 +2,11 @@
   <div class="home">
     <div class="card">
       <div class="card__title">
-        <span class="card__title--accent">DepEd</span> Attendance Generator
+        <span class="card__title--accent">DepEd</span> DTR Generator
       </div>
 
       <div class="card__subtitle">
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. At accusamus iure incidunt! Rem, eveniet. Sunt sequi placeat soluta optio labore mollitia porro quidem praesentium veniam, cupiditate nihil hic saepe exercitationem?</p>
-
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. At accusamus iure incidunt! Rem, eveniet. Sunt sequi placeat soluta optio labore mollitia porro quidem praesentium veniam, cupiditate nihil hic saepe exercitationem?</p>
+        <p>This tool generates a <strong>DTR</strong> based on the excel file uploaded</p>
       </div>
 
       <div class="card__subtitle">
@@ -33,7 +31,27 @@
         >
       </div>
 
-      <div class="card__subtitle">
+      <div class="card__subtitle documentation">
+        <img
+          src="./assets/images/excel-form2.png"
+          alt=""
+          class="documentation__img--excel-form"
+        >
+
+        <img
+          src="./assets/svg/chevron-right.svg"
+          alt=""
+          class="documentation__img--chevron-right"
+        >
+
+        <img
+          src="./assets/images/dtr-form2.png"
+          alt=""
+          class="documentation__img--dtr-form"
+        >
+      </div>
+
+      <div class="card__subtitle developer-credit">
         Made with 💙 by <a
           href="https://jeash.tech"
           target="_blank"
@@ -275,10 +293,10 @@ export default {
           attendance[monthOf].push([
             '',
             dayNo,
-            amArrival ? moment(amArrival, 'HH:mm:ss').format('hh:mm:ss') : '',
-            amDeparture ? moment(amDeparture, 'HH:mm:ss').format('hh:mm:ss') : '',
-            pmArrival ? moment(pmArrival, 'HH:mm:ss').format('hh:mm:ss') : '',
-            pmDeparture ? moment(pmDeparture, 'HH:mm:ss').format('hh:mm:ss') : '',
+            amArrival ? moment(amArrival, 'HH:mm:ss').format('hh:mm') : '',
+            amDeparture ? moment(amDeparture, 'HH:mm:ss').format('hh:mm') : '',
+            pmArrival ? moment(pmArrival, 'HH:mm:ss').format('hh:mm') : '',
+            pmDeparture ? moment(pmDeparture, 'HH:mm:ss').format('hh:mm') : '',
             '',
             '',
             ''
@@ -654,6 +672,7 @@ export default {
         })
       })()
 
+      // Day
       ;(() => {
         const cols = Array.from({ length: daysInTheMonth }, (_, i) => {
           return `B${12 + i}`
@@ -666,7 +685,7 @@ export default {
               horizontal: 'center'
             },
             font: {
-              sz: 10,
+              sz: 8,
               italic: true
             }
           })
