@@ -77,6 +77,9 @@ import _flatten from 'lodash/flatten'
 import _groupBy from 'lodash/groupBy'
 import _get from 'lodash/get'
 import _mapKeys from 'lodash/mapKeys'
+import _upperFirst from 'lodash/upperFirst'
+import _trim from 'lodash/trim'
+import _isNil from 'lodash/isNil'
 
 // helpers
 const readFile = files => new Promise((resolve, reject) => {
@@ -151,7 +154,7 @@ export default {
         .map(item => {
           const curr = _mapKeys(item, (_, key) => dictionary[key])
 
-          const datetime = moment(curr.datetime, 'M/D/YYYY H:mm:ss A')
+          const datetime = moment(_trim(curr.datetime), 'M/D/YYYY H:mm:ss A')
 
           curr.timestamp = {
             datetime: datetime.format('YYYY-MM-DD HH:mm:ss'),
@@ -191,39 +194,22 @@ export default {
               let afternoonTimeOut
 
               userTimeline.forEach(curr => {
-                const isMorning = moment(curr.timestamp.time, 'HH:mm:ss').isBefore(moment('12:00:00', 'HH:mm:ss'))
-                const isAfternoon = !isMorning
+                const status = curr.status
 
-                if (isMorning) {
-                  /**
-                    * Get first morning time in
-                    */
-                  if (curr.status === 'C/In' && !morningTimeIn) {
-                    morningTimeIn = curr
-                  }
-
-                  /**
-                    * Get last morning time out
-                    */
-                  if (curr.status === 'C/Out') {
-                    morningTimeOut = curr
-                  }
+                if (status === 'C/In' && _isNil(morningTimeIn)) {
+                  morningTimeIn = curr
                 }
 
-                if (isAfternoon) {
-                  /**
-                    * Get first morning time in
-                    */
-                  if (curr.status === 'C/In' && !afternoonTimeIn) {
-                    afternoonTimeIn = curr
-                  }
+                if (status === 'Out' && _isNil(morningTimeOut)) {
+                  morningTimeOut = curr
+                }
 
-                  /**
-                    * Get last morning time out
-                    */
-                  if (curr.status === 'C/Out') {
-                    afternoonTimeOut = curr
-                  }
+                if (status === 'Out Back' && _isNil(afternoonTimeIn)) {
+                  afternoonTimeIn = curr
+                }
+
+                if (status === 'C/Out' && _isNil(afternoonTimeOut)) {
+                  afternoonTimeOut = curr
                 }
               })
 
@@ -905,7 +891,8 @@ export default {
             skipHeader: true
           })
 
-          const filename = `${userData.user_id}|${monthOf}`
+          const lastName = str => _upperFirst(str).split(',')[0]
+          const filename = `${lastName(userData.user_id)}_${monthOf.split(' ').join('_')}`
 
           /* add worksheet to workbook */
           XLSX.utils.book_append_sheet(workbook, worksheet, filename)
