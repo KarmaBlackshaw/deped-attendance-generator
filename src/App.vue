@@ -10,7 +10,7 @@
 .app {
   min-height: 100vh;
   height: 100%;
-  padding: 100px;
+  padding: 50px;
 
   @include smAndBelow {
     padding: 10px;
