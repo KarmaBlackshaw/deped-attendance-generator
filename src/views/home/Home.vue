@@ -52,13 +52,13 @@
       </div>
 
       <div class="card__subtitle developer-credit">
-        Made with
+        <span>Made with</span>
         <img
           src="./assets/images/vue-icon.png"
           alt=""
           class="developer-credit--vue"
         >
-        by
+        <span>by</span>
         <a
           href="https://jeash.tech"
           target="_blank"
