@@ -2,7 +2,7 @@
   <div class="home">
     <div class="card">
       <div class="card__title">
-        <span class="card__title--accent">DepEd</span> DTR Generator
+        <span class="card__title--accent">EXCEL TO DTR GENERATOR</span>
       </div>
 
       <div class="card__subtitle">
@@ -52,10 +52,19 @@
       </div>
 
       <div class="card__subtitle developer-credit">
-        Made with 💙 by <a
+        Made with
+        <img
+          src="./assets/images/vue-icon.png"
+          alt=""
+          class="developer-credit--vue"
+        >
+        by
+        <a
           href="https://jeash.tech"
           target="_blank"
-        >Ernie Jeash</a>
+        >
+          Ernie Jeash
+        </a>
       </div>
     </div>
   </div>
@@ -109,10 +118,6 @@ export default {
     return {
       waitUntilElementIsLoaded
     }
-  },
-
-  created () {
-    // this.handleFileSelect()
   },
 
   methods: {
@@ -820,8 +825,8 @@ export default {
       })()
 
       /**
-         * in-charge
-         */
+       * in-charge
+       */
       ;(() => {
         const cols = [`B${gap(22)}`, `C${gap(22)}`, `D${gap(22)}`]
 
