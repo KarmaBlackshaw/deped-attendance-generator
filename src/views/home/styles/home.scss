@@ -5,39 +5,43 @@
 }
 
 .card {
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
-    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
-  border-radius: 20px;
+  border-radius: 10px;
   padding-top: min(30px, 10%);
   padding-bottom: min(30px, 10%);
   padding-left: min(60px, 10%);
   padding-right: min(60px, 10%);
   width: 100%;
   max-width: 800px;
+  box-shadow: none;
 
-  @include smAndBelow {
-    box-shadow: none;
+  @include dark() {
+    background-color: theme("colors.stone.700");
+  }
+
+  @include breakpoint_sm {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+      rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
   }
 
   .card__title {
-    font-size: 2.5em;
     text-align: center;
     font-weight: bold;
     margin-bottom: 20px;
-    color: $gray-600;
+    color: theme("colors.neutral.600");
+    font-size: 2em;
 
-    @include smAndBelow {
-      font-size: 2em;
+    @include breakpoint_sm {
+      font-size: 2.5em;
     }
 
     .card__title--accent {
-      color: $blue-500;
+      color: theme("colors.blue.500");
     }
   }
 
   .card__subtitle {
     line-height: 150%;
-    color: $gray-500;
+    color: theme("colors.neutral.500");
     text-align: center;
 
     p {
@@ -61,7 +65,7 @@
   }
 
   .btn {
-    background-color: $blue-500;
+    background-color: theme("colors.blue.500");
     border: 0 solid #e5e7eb;
     box-sizing: border-box;
     color: #fff;
@@ -152,9 +156,10 @@
   margin-bottom: 40px;
   flex: 1 1 auto;
   position: relative;
+  flex-direction: column;
 
-  @include smAndBelow {
-    flex-direction: column;
+  @include breakpoint_lg {
+    flex-direction: row;
   }
 
   img {
@@ -178,9 +183,9 @@
     width: 30px;
     height: 30px;
     margin: 10px;
+    transform: rotate(90deg);
 
-    @include smAndBelow {
-      transform: rotate(90deg);
-    }
+    // @include smAndBelow {
+    // }
   }
 }

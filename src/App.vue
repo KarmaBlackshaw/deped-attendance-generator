@@ -1,5 +1,11 @@
 <template>
   <div class="app">
+    <div class="app__header">
+      <div class="header-container">
+        <base-theme-toggle class="app__themeToggle" />
+      </div>
+    </div>
+
     <div class="app__body">
       <router-view />
     </div>
@@ -7,14 +13,5 @@
 </template>
 
 <style lang="scss">
-.app {
-  min-height: 100vh;
-  height: 100%;
-  padding: 50px;
-
-  @include smAndBelow {
-    padding: 10px;
-  }
-}
-
+@import '~assets/App';
 </style>

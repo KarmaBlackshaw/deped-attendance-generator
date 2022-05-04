@@ -1,0 +1,25 @@
+body {
+  @include dark() {
+    background-color: theme("colors.stone.800");
+  }
+}
+.app {
+  min-height: 100vh;
+  height: 100%;
+
+  .app__header {
+    height: 64px;
+    margin-bottom: 10px;
+    @apply shadow-sm;
+
+    .header-container {
+      max-width: 1240px;
+      margin-right: auto;
+      margin-left: auto;
+      height: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+  }
+}

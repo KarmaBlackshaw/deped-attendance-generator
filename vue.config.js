@@ -3,7 +3,8 @@ module.exports = {
     loaderOptions: {
       sass: {
         additionalData: `
-          @import "@/styles/import.scss";
+          @import "@/assets/scss/mixins/_breakpoint.scss";
+          @import "@/assets/scss/mixins/_theme.scss";
         `
       }
     }
