@@ -6,6 +6,10 @@ import _mapKeys from 'lodash/mapKeys'
 import _trim from 'lodash/trim'
 import _isNil from 'lodash/isNil'
 
+function pipe (initial, fns) {
+  return fns.reduce((v, f) => f(v), initial)
+}
+
 export default () => {
   function getData (data) {
     const dictionary = {
@@ -22,20 +26,19 @@ export default () => {
 
     // helpers
     const generateDateTimelines = date => {
-      const startOfMonth = moment(date).startOf('month')
-      const endOfMonth = moment(date).endOf('month')
-      const daysGap = endOfMonth.diff(startOfMonth, 'd')
-      const timeline = {}
+      const dateInstance = moment(date)
 
-      for (let i = 0; i < daysGap; i++) {
-        const currDate = moment(startOfMonth)
-          .add(i, 'd')
-          .format('YYYY-MM-DD')
+      const daysInMonth = dateInstance.daysInMonth()
+      const year = dateInstance.format('YYYY')
+      const month = dateInstance.format('MM')
 
-        timeline[currDate] = {}
-      }
+      const toDateUsingDay = day => `${year}-${month}-${String(day).padStart(2, '0')}`
 
-      return timeline
+      return pipe(daysInMonth, [
+        val => Array.from({ length: val }),
+        val => val.map((_, idx) => toDateUsingDay(idx + 1)),
+        val => val.reduce((acc, curr) => ({ ...acc, [curr]: {} }), {})
+      ])
     }
 
     /**
