@@ -190,7 +190,8 @@
     margin: 10px;
     transform: rotate(90deg);
 
-    // @include smAndBelow {
-    // }
+    @include breakpoint_sm {
+      transform: rotate(0deg);
+    }
   }
 }
