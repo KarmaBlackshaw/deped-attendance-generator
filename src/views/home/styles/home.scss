@@ -32,7 +32,7 @@
     letter-spacing: 0.05em;
 
     @include dark() {
-      color: theme("colors.neutral.100");
+      color: theme("colors.neutral.300");
     }
 
     @include breakpoint_sm {
@@ -46,7 +46,7 @@
     text-align: center;
 
     @include dark() {
-      color: theme("colors.neutral.200");
+      color: theme("colors.neutral.400");
     }
 
     p {
