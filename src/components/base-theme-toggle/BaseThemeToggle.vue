@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="base-theme-toggle">
     <input
       id="checkbox"
       type="checkbox"
@@ -7,13 +7,20 @@
       :checked="isDark"
       @change="toggleDark()"
     >
+
     <label
       for="checkbox"
       class="label"
     >
-      <i class="fas fa-moon"></i>
+      <img
+        src="./assets/images/moon.png"
+        alt=""
+      >
 
-      <i class="fas fa-sun"></i>
+      <img
+        src="./assets/images/sun.png"
+        alt=""
+      >
 
       <div class="ball"></div>
     </label>
