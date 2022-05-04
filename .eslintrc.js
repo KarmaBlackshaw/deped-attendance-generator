@@ -64,8 +64,10 @@ module.exports = {
     'prefer-spread': 'error',
     'require-await': 'error',
     'template-curly-spacing': 'off',
+    'vue/multi-word-component-names': 'off',
     'vue/component-definition-name-casing': ['error', 'PascalCase'],
     'vue/component-name-in-template-casing': 'off',
+    'no-unused-vars': ['error', { "args": "none" }],
     'vue/html-closing-bracket-newline': [
       'error',
       {
