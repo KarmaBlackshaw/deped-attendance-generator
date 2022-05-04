@@ -1,9 +1,9 @@
 <template>
   <div class="app">
+    <div class="app__background"></div>
+
     <div class="app__header">
-      <div class="header-container">
-        <base-theme-toggle class="app__themeToggle" />
-      </div>
+      <TheNavigation />
     </div>
 
     <div class="app__body">
@@ -12,6 +12,27 @@
   </div>
 </template>
 
+<script>
+import { provide } from 'vue'
+
+// composables
+import useBreakpoint from '@/composables/useBreakpoint'
+import useTheme from '@/composables/useTheme'
+
+// components
+import TheNavigation from '@/components/the-navigation/TheNavigation'
+
+export default {
+  components: {
+    TheNavigation
+  },
+
+  setup () {
+    provide('breakpoint', useBreakpoint())
+    provide('theme', useTheme())
+  }
+}
+</script>
 <style lang="scss">
 @import '~assets/App';
 </style>

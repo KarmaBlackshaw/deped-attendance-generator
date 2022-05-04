@@ -2,7 +2,7 @@
   <div class="home">
     <div class="card">
       <div class="card__title">
-        <span class="card__title--accent">EXCEL TO DTR GENERATOR</span>
+        Excel to DTR Generator
       </div>
 
       <div class="card__subtitle">
@@ -31,7 +31,10 @@
         >
       </div>
 
-      <div class="card__subtitle documentation">
+      <div
+        v-if="breakpoint.size.value.lg"
+        class="card__subtitle documentation"
+      >
         <img
           src="./assets/images/excel-form2.png"
           alt=""
@@ -71,6 +74,8 @@
 </template>
 
 <script>
+import { inject } from 'vue'
+
 // libs
 import XLSX from 'xlsx-js-style'
 import * as xlsx from 'xlsx'
@@ -114,7 +119,11 @@ export default {
       getData: getDtrData
     } = useDtr()
 
+    const bp = inject('breakpoint')
+
     return {
+      breakpoint: inject('breakpoint'),
+
       getDtrData
     }
   },

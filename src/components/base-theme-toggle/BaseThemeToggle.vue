@@ -5,46 +5,42 @@
       type="checkbox"
       class="checkbox"
       :checked="isDark"
-      @change="toggleDark()"
+      @change="toggle()"
     >
 
     <label
       for="checkbox"
       class="label"
     >
-      <img
-        src="./assets/images/moon.png"
-        alt=""
-      >
 
-      <img
-        src="./assets/images/sun.png"
-        alt=""
-      >
-
-      <div class="ball"></div>
+      <div class="ball">
+        <img
+          v-if="isDark"
+          src="./assets/images/sun-3.png"
+          alt=""
+        >
+        <img
+          v-else
+          src="./assets/images/moon-3.png"
+          alt=""
+        >
+      </div>
     </label>
   </div>
 </template>
 
 <script>
-import { useDark, useToggle } from '@vueuse/core'
+import { inject } from 'vue'
 
 export default {
   name: "BaseThemeToggle",
 
   setup () {
-    const isDark = useDark({
-      attribute: 'data-theme',
-      valueDark: 'dark',
-      valueLight: 'light'
-    })
-
-    const toggleDark = useToggle(isDark)
+    const theme = inject('theme')
 
     return {
-      isDark,
-      toggleDark
+      isDark: theme.isDark,
+      toggle: theme.toggle
     }
   }
 }
