@@ -11,12 +11,11 @@
     "core-js": "^3.22.4",
     "gsap": "file:src/libs/gsap-bonus.tgz",
     "moment": "^2.29.3",
-    "sheetjs-style": "^0.15.8",
     "vue": "^3.2.33",
     "vue-router": "^4.0.14",
     "vuex": "^4.0.0-0",
     "xlsx": "^0.18.1",
-    "xlsx-js-style": "^1.0.0"
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

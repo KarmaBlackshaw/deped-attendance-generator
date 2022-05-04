@@ -72,7 +72,7 @@
 
 <script>
 // libs
-import XLSX from 'sheetjs-style'
+import XLSX from 'xlsx-js-style'
 import * as xlsx from 'xlsx'
 
 // helpers
