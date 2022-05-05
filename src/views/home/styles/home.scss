@@ -6,6 +6,7 @@
 
 .card {
   margin-top: 50px;
+
   border-radius: 5px;
   padding-top: min(30px, 10%);
   padding-bottom: min(30px, 10%);
@@ -16,11 +17,12 @@
   margin-left: 20px;
   min-height: 200px;
   background-color: theme("colors.slate.50");
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
-    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  border: 1px solid theme("colors.slate.100");
+  @apply shadow-lg;
 
   @include dark() {
-    background-color: theme("colors.green.1000");
+    background-color: theme("colors.slate.900");
+    border: 1px solid theme("colors.slate.700");
   }
 
   .card__title {
@@ -32,7 +34,7 @@
     letter-spacing: 0.05em;
 
     @include dark() {
-      color: theme("colors.neutral.300");
+      color: theme("colors.neutral.200");
     }
 
     @include breakpoint_sm {
@@ -44,9 +46,10 @@
     line-height: 150%;
     color: theme("colors.neutral.500");
     text-align: center;
+    font-family: Poppins;
 
     @include dark() {
-      color: theme("colors.neutral.400");
+      color: theme("colors.neutral.300");
     }
 
     p {
@@ -70,7 +73,7 @@
   }
 
   .btn {
-    background-color: theme("colors.green.400");
+    background-color: #7bdcb5;
     border: 0 solid #e5e7eb;
     box-sizing: border-box;
     color: theme("colors.green.950");
