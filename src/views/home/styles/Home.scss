@@ -7,23 +7,31 @@
 }
 
 .card {
+  @apply shadow-lg;
   margin-top: 30px;
   margin-bottom: 30px;
-
-  border-radius: 5px;
   padding-top: min(30px, 10%);
   padding-bottom: min(30px, 10%);
   padding-left: min(60px, 10%);
   padding-right: min(60px, 10%);
   max-width: 800px;
   min-height: 200px;
-  background-color: theme("colors.slate.50");
-  border: 1px solid theme("colors.slate.100");
-  @apply shadow-lg;
+  backdrop-filter: blur(15.9px);
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(15.9px);
+
+  // background-color: theme("colors.slate.50");
+  // border: 1px solid theme("colors.slate.100");
+  background: rgba(248, 250, 252, 0.54);
+  box-shadow: 0 4px 30px rgba(248, 250, 252, 0.1);
+  border: 1px solid rgba(241, 245, 249, 0.5);
 
   @include dark() {
-    background-color: theme("colors.slate.900");
-    border: 1px solid theme("colors.slate.700");
+    // background-color: theme("colors.slate.900");
+    // border: 1px solid theme("colors.slate.700");
+    background: rgba(15, 23, 42, 0.54);
+    box-shadow: 0 4px 30px rgba(15, 23, 42, 0.1);
+    border: 1px solid rgba(51, 65, 85, 0.5);
   }
 
   .card__title {
@@ -143,6 +151,11 @@
 .developer-credit {
   display: flex;
   justify-content: center;
+  color: theme("colors.slate.500")!important;
+
+  @include dark () {
+    color: theme("colors.slate.50")!important;
+  }
 
   .developer-credit--vue {
     height: 30px;
