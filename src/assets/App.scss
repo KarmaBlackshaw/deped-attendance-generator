@@ -1,6 +1,6 @@
 body {
   @include dark() {
-    background-color: theme("colors.green.950");
+    background-color: theme("colors.slate.900");
   }
 }
 
