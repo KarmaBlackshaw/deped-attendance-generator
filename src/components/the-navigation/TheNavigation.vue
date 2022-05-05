@@ -3,7 +3,7 @@
     <div class="navigation__body">
       <div class="the-navigation__item the-navigation__item--logo">
         <img
-          src="./assets/images/excel.png"
+          src="./assets/svg/excel.svg"
           alt=""
         >
       </div>

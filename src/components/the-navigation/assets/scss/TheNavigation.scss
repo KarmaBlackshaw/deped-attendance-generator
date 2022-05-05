@@ -38,6 +38,11 @@
       &.the-navigation__item--logo {
         justify-content: flex-start;
         margin-right: 10px;
+
+        img {
+          height: 80px;
+          width: auto;
+        }
       }
     }
   }
