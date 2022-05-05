@@ -3,6 +3,10 @@
   width: 100%;
   top: 0;
 
+  @include dark() {
+    border-bottom: 1px solid theme("colors.slate.700");
+  }
+
   .navigation__body {
     max-width: 1440px;
     width: 90%;
