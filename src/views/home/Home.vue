@@ -31,10 +31,7 @@
         >
       </div>
 
-      <div
-        v-if="breakpoint.size.value.lg"
-        class="card__subtitle documentation"
-      >
+      <div class="card__subtitle documentation">
         <img
           src="./assets/images/excel-form2.png"
           alt=""
