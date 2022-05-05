@@ -151,10 +151,10 @@
 .developer-credit {
   display: flex;
   justify-content: center;
-  color: theme("colors.slate.500")!important;
+  color: theme("colors.neutral.600")!important;
 
   @include dark () {
-    color: theme("colors.slate.50")!important;
+    color: theme("colors.neutral.50")!important;
   }
 
   .developer-credit--vue {
