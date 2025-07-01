@@ -1,8 +1,10 @@
 <script setup>
 // libs
+import { ref } from 'vue'
 import XLSX from 'xlsx-js-style'
 import JSZip from 'jszip'
 import moment from 'moment'
+import tryToCatch from 'try-to-catch'
 
 // helpers
 import { getElement } from '@/utils/helpers'
@@ -30,7 +32,10 @@ async function handleClickBrowseFiles () {
   inputFile.click()
 }
 
+const error = ref('')
 async function handleFileSelect (e) {
+  error.value = ''
+
   /**
     Helpers
     */
@@ -43,7 +48,13 @@ async function handleFileSelect (e) {
   const data = await readXlxs(files[0])
   e.target.value = null
 
-  const dtrData = await getDtrData(data)
+  const [err, dtrData] = await tryToCatch(() => getDtrData(data))
+
+  if (err?.message) {
+    error.value = err.message
+    console.error('Error:', error.value)
+    return
+  }
 
   const zip = new JSZip()
   for (let i = 0; i < dtrData.length; i++) {
@@ -129,6 +140,16 @@ async function handleFileSelect (e) {
 <template>
   <div class="home">
     <div class="card">
+      <div
+        v-if="error"
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        role="alert"
+      >
+        <strong class="font-bold block">Holy smokes!</strong>
+
+        <span class="block sm:inline">{{ error }}</span>
+      </div>
+
       <div class="card__title">
         Excel to DTR Generator
       </div>

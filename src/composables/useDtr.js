@@ -51,7 +51,11 @@ export default () => {
       .map(item => {
         const curr = _mapKeys(item, (_, key) => dictionary[key])
 
-        const datetime = moment(_trim(curr.datetime), 'DD/MM/YYYY H:mm:ss A')
+        const datetime = moment(_trim(curr.datetime))
+
+        if (!datetime.isValid()) {
+          throw new Error(`Invalid date format: ${curr.datetime}`)
+        }
 
         curr.timestamp = {
           datetime: datetime.format('YYYY-MM-DD HH:mm:ss'),
